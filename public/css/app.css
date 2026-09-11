@@ -49,3 +49,34 @@ label{display:block;margin-bottom:7px;font-size:11px;font-weight:950;letter-spac
 @media(max-width:1050px){.home-hero,.grid,.grid-3,.grid-4{grid-template-columns:1fr 1fr}.chooser{grid-template-columns:1fr 1fr}}
 @media(max-width:1000px){.kanban{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){.home-hero,.grid,.grid-3,.grid-4,.kanban{grid-template-columns:1fr}.chooser{grid-template-columns:1fr}.shell,.student-wrap{padding:14px}.topbar{padding:12px 14px;align-items:flex-start}.page-head{display:block}.route-builder{grid-template-columns:1fr}.network-wrap{height:360px}.action-grid{grid-template-columns:1fr}.toy-scene{transform:scale(.88);transform-origin:center}.home{padding:18px}.home-hero{padding:22px}}
+.institutional-strip{background:#fff;border-bottom:1px solid var(--line);padding:9px 18px}
+.institutional-inner{max-width:1400px;margin:0 auto;display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center}
+.institutional-inner strong,.institutional-inner span{display:block}.institutional-inner strong{font-size:12px}.institutional-inner span{font-size:11px;color:var(--muted);margin-top:2px}
+.institutional-monogram{width:40px;height:40px;border:2px solid var(--ink);border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:950;letter-spacing:.05em;background:#fff}
+.institutional-course{text-align:right}.institutional-footer{max-width:1400px;margin:30px auto 0;padding:20px 24px 28px;text-align:center;color:var(--muted);font-size:11px;line-height:1.55}.institutional-footer strong{color:var(--ink)}
+.state.cancelado{background:#f2f3f5;color:#697386;text-decoration:line-through}
+.lego-workshop{display:grid;grid-template-columns:minmax(210px,.65fr) minmax(420px,1.7fr) minmax(210px,.65fr);gap:16px;align-items:start}
+.lego-toolbar,.lego-bom{border:1px solid var(--line);border-radius:18px;background:#fbfcfd;padding:14px;display:grid;gap:13px}
+.lego-stage-wrap{overflow:auto;border:1px solid var(--line);border-radius:18px;background:linear-gradient(180deg,#fbfcfd,#f3f5f8);padding:18px;box-shadow:inset 0 0 0 1px #fff}
+.lego-stage{position:relative;width:min(720px,100%);aspect-ratio:16/10;margin:0 auto;border-radius:14px;background:#e9edf2;overflow:hidden;box-shadow:inset 0 0 0 1px #d9e0e8}
+.lego-grid{position:absolute;inset:0;background-image:linear-gradient(to right,rgba(80,95,115,.12) 1px,transparent 1px),linear-gradient(to bottom,rgba(80,95,115,.12) 1px,transparent 1px);background-size:6.25% 10%}
+.lego-stage:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at center,rgba(255,255,255,.9) 0 19%,transparent 20%) 0 0/6.25% 10%;opacity:.8;pointer-events:none}
+.lego-piece{position:absolute;left:calc(var(--x)*6.25%);top:calc(var(--y)*10%);width:calc(var(--w)*6.25%);height:calc(var(--h)*10%);border:0;border-radius:7px;background:var(--brick);box-shadow:inset 0 -7px 0 rgba(0,0,0,.10),0 5px 9px rgba(38,52,70,.16);padding:6px;display:grid;grid-template-columns:repeat(var(--w),1fr);grid-template-rows:repeat(var(--h),1fr);gap:4px;z-index:2}
+.lego-piece i{display:block;width:68%;aspect-ratio:1;border-radius:50%;background:rgba(255,255,255,.62);box-shadow:inset 0 -2px 0 rgba(0,0,0,.10);place-self:center;pointer-events:none}
+.brick-colors{display:flex;flex-wrap:wrap;gap:8px}.brick-color{width:30px;height:30px;border-radius:9px;border:2px solid #fff;box-shadow:0 0 0 1px var(--line)}.brick-color.selected{box-shadow:0 0 0 3px var(--ink)}
+.bom-row{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;border:1px solid var(--line);background:#fff;border-radius:12px;padding:9px}.bom-swatch{width:20px;height:20px;border-radius:6px;border:1px solid rgba(0,0,0,.08)}
+.report-actions{display:flex;gap:10px;flex-wrap:wrap}.report-paper{background:#fff;border:1px solid var(--line);border-radius:20px;padding:30px;box-shadow:var(--shadow)}
+.report-cover{text-align:center;padding:28px 10px 32px;border-bottom:2px solid var(--ink)}.report-cover h1{font-size:2rem;margin:12px 0 8px}.report-cover p{margin:4px 0;color:var(--muted)}
+.report-section{padding:24px 0;border-bottom:1px solid var(--line)}.report-section:last-child{border-bottom:0}.report-section h2{margin:0 0 12px;font-size:1.35rem}.report-section h3{font-size:1rem;margin:16px 0 8px}
+.report-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.report-chart{border:1px solid var(--line);border-radius:16px;padding:14px;background:#fff}.report-chart svg{width:100%;height:auto;display:block}
+.report-table{width:100%;border-collapse:collapse;font-size:12px}.report-table th,.report-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.report-table th{background:#f7f8fa;font-weight:900}
+.report-callout{border-left:4px solid var(--yellow);background:var(--yellow-soft);padding:12px 14px;border-radius:0 12px 12px 0}.report-metric{padding:12px;border:1px solid var(--line);border-radius:14px}.report-metric strong{display:block;font-size:1.4rem}.report-metric span{font-size:11px;color:var(--muted)}
+.report-diagram{overflow:auto}.report-diagram svg{min-width:620px;width:100%;height:auto}
+@media(max-width:960px){.lego-workshop{grid-template-columns:1fr}.lego-stage-wrap{order:1}.lego-toolbar{order:0}.lego-bom{order:2}.report-grid{grid-template-columns:1fr}}
+@media(max-width:720px){.institutional-inner{grid-template-columns:auto 1fr}.institutional-course{grid-column:1/-1;text-align:left;padding-left:52px}.lego-stage{min-width:620px}.report-paper{padding:18px}}
+@media print{
+  body{background:#fff}.institutional-strip,.topbar,.institutional-footer,.no-print,#toast{display:none!important}
+  .shell{max-width:none;padding:0}.main>*:not(#reportSection){display:none!important}#reportSection{display:block!important;border:0!important;box-shadow:none!important;padding:0!important}
+  .report-paper{border:0;box-shadow:none;padding:0}.report-section{break-inside:avoid}.report-chart,.report-table{break-inside:avoid}
+  @page{size:A4;margin:13mm}
+}
