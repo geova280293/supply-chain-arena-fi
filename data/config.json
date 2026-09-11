@@ -1,0 +1,12 @@
+{
+  "sessionName": "Práctica 04 · Supply Chain Arena",
+  "orderSeq": 0,
+  "locations": [
+    {"name":"Edificio A","active":true},{"name":"Edificio B","active":true},{"name":"Edificio C","active":true},{"name":"Centro de Cómputo","active":false},{"name":"Gimnasio","active":false},{"name":"FiTacate","active":false},{"name":"Cafecito","active":false},{"name":"Oxxito","active":false},{"name":"Bosquesito","active":true},{"name":"Aula al Aire Libre","active":false},{"name":"Laboratorio de Automatización","active":true},{"name":"Laboratorio de Mecatrónica","active":true},{"name":"Laboratorio de Suelos","active":false},{"name":"Laboratorio de Hidráulica","active":false},{"name":"CETEVI","active":true},{"name":"CEDIT","active":true},{"name":"Edificio Biotecnológico","active":true},{"name":"Estadio","active":false},{"name":"Estacionamiento","active":true},{"name":"Sótano","active":false},{"name":"Canchas de Squash","active":false},{"name":"Canchas de Frontón","active":false},{"name":"Auditorio","active":true},{"name":"Explanada del Biotecnológico","active":true},{"name":"Edificio E","active":false},{"name":"Edificio F","active":false},{"name":"Edificio G","active":false},{"name":"Edificio I","active":false},{"name":"Plaza de Arquitectura","active":true},{"name":"Edificio H","active":false}
+  ],
+  "teams": [
+    {"id":"A","name":"Equipo A","color":"#e7656f","plant":"Edificio A","members":["Torre A","Producción A","Transportista A1","Transportista A2"]},
+    {"id":"B","name":"Equipo B","color":"#4c8fe8","plant":"Edificio B","members":["Torre B","Producción B","Transportista B1","Transportista B2"]}
+  ],
+  "orders": []
+}
