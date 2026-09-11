@@ -1,0 +1,23 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Docente · Supply Chain Arena</title><link rel="stylesheet" href="css/app.css"></head><body>
+<header class="topbar"><div class="brand"><div class="brand-mark"></div><div><div class="brand-title">Supply Chain Arena · Docente</div><div class="brand-sub" id="sessionTitle">Logística I</div></div></div><div class="row"><span id="net" class="status">conectando…</span><a class="btn light small" href="index.html">Inicio</a></div></header>
+<main class="shell main">
+  <section class="card factory-banner"><div class="factory-copy"><div class="eyebrow">Tu función</div><h2>Genera demanda. Los equipos toman las decisiones.</h2><p>Define plantas y lugares activos, emite pedidos con destino y tiempo límite, y observa la operación sin intervenir en la planeación de rutas.</p></div><div class="toy-scene"><div class="chimney"></div><div class="factory-body"></div><div class="belt"></div><div class="cargo-bricks"><div class="brick y"></div><div class="brick r"></div><div class="brick b"></div></div><div class="truck"></div></div></section>
+  <section class="grid">
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Nuevo pedido</div><h2>Emitir demanda</h2></div></div>
+      <div class="stack"><div><label>Destino</label><select id="orderDestination"></select></div><div class="grid"><div><label>Cantidad</label><input id="orderQty" type="number" min="1" value="4"></div><div><label>Tiempo de entrega (min)</label><input id="orderDeadline" type="number" min="1" value="8"></div></div><div><label>Prioridad</label><select id="orderPriority"><option>normal</option><option>alta</option><option>urgente</option><option>critica</option></select></div><div><label>Asignar a</label><select id="orderAudience"><option value="ALL">Todos los equipos</option></select></div><button class="btn yellow big" id="addOrder">CREAR PEDIDO</button></div>
+    </div>
+    <div class="card"><div class="card-title"><div><div class="eyebrow">En vivo</div><h2>Pedidos en curso</h2></div></div><div id="liveOrders" class="stack"></div></div>
+  </section>
+  <section class="card"><div class="card-title"><div><div class="eyebrow">Kanban</div><h2>Flujo visual de pedidos</h2></div></div><div id="teacherKanban" class="kanban"></div></section>
+  <section class="card"><div class="card-title"><div><div class="eyebrow">Resultados</div><h2>Estado general</h2></div><button class="btn light small" id="refreshBtn">Actualizar</button></div><div id="kpis" class="kpis"></div></section>
+  <section class="grid">
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Configuración rápida</div><h2>Campo y equipos</h2></div></div>
+      <div class="stack"><div><label>Nombre de sesión</label><input id="sessionName"></div><div><label>Lugares activos</label><div id="locations" class="locations"></div></div><div class="row nowrap"><input id="customLocation" placeholder="Agregar otro lugar"><button class="btn light" id="addLocation">Agregar</button></div><button class="btn" id="saveSetup">Guardar configuración</button></div>
+    </div>
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Equipos</div><h2>Planta e integrantes</h2></div><button class="btn light small" id="addTeam">+ Equipo</button></div><div id="teamEditor" class="stack"></div></div>
+  </section>
+  <section class="grid">
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Ruta caliente</div><h2>Tramos con más actividad</h2></div></div><div id="routeHeat" class="route-heat"></div></div>
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Bitácora</div><h2>Eventos</h2></div></div><div id="eventlog" class="eventlog"></div><div class="row" style="margin-top:12px"><button class="btn light small" id="exportEvents">Exportar</button><label class="btn light small" style="cursor:pointer">Importar offline<input hidden type="file" id="importEvents" accept="application/json"></label><button class="btn red small" id="resetEvents">Reiniciar datos</button></div></div>
+  </section>
+</main><div id="toast" class="toast"></div><script src="js/common.js"></script><script src="js/teacher.js"></script></body></html>
