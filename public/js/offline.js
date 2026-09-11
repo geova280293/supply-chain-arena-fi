@@ -1,0 +1,3 @@
+const $=id=>document.getElementById(id);async function pending(){const a=await dbAll();$('pendingCount').textContent=`${a.length} eventos`}
+$('saveEvent').onclick=async()=>{const e={id:uuid(),ts:nowISO(),teamId:$('team').value.trim()||'Equipo',member:$('member').value.trim()||'Integrante',orderId:$('orderId').value.trim(),type:$('eventType').value,units:+$('qty').value||1,offlineManual:true};await dbPut(e);await pending();toast('Evento guardado localmente')};
+$('exportBtn').onclick=async()=>{const data=await dbAll();const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`supply_chain_arena_offline_${Date.now()}.json`;a.click();URL.revokeObjectURL(a.href)};pending();
