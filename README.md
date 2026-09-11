@@ -1,9 +1,27 @@
-# Supply Chain Arena FI
+# Supply Chain Arena · versión definitiva
 
-Aplicación web para la práctica de Logística I: docente, torre de control, producción y transportistas.
+## Arranque local
+1. Abre una terminal dentro de esta carpeta.
+2. Ejecuta: `node server.js`
+3. Docente: `http://localhost:3000/teacher.html`
+4. Usa las direcciones que muestra la terminal para Torre de Control, Producción y Transportista desde los dispositivos conectados a la misma red.
 
-La aplicación usa Node.js y requiere un servidor para las funciones en tiempo real. El código completo se incluye en `supply_chain_arena_definitiva_kanban.zip`.
+No requiere Internet ni paquetes npm externos.
 
-Para ejecución local: descomprime el ZIP y ejecuta `node server.js` dentro de la carpeta resultante.
+## Flujo de la dinámica
+Docente crea pedido → Torre define ruta y lote → Producción fabrica y libera → Transportistas recogen → entregan o son interceptados → Torre usa estadísticas y mapa de calor para decidir los siguientes pedidos.
 
-Para despliegue web, el repositorio incluye `render.yaml`.
+## Torre de Control
+La sección **Decisión** conserva los cambios de puntos intermedios y tamaño de lote mientras se edita, incluso cuando el tablero se actualiza cada segundo. Al pulsar **MANDAR A PRODUCCIÓN** o **GUARDAR CAMBIOS**, la ruta y el lote se guardan en el servidor.
+
+## Pedidos en paralelo
+La plataforma admite múltiples pedidos activos por equipo. Producción puede trabajar con varios pedidos y distintos transportistas pueden llevar simultáneamente envíos de pedidos diferentes o lotes distintos de un mismo pedido.
+
+## Kanban
+El panel Docente y la Torre de Control incluyen un Kanban automático de solo lectura con las etapas: Nuevo, Producción, Listo, Distribución y Completado/Vencido.
+
+## Despliegue
+La aplicación requiere un servidor Node.js. Puede desplegarse directamente desde este repositorio en Render usando:
+- Runtime: Node
+- Build command: `npm install`
+- Start command: `npm start`
