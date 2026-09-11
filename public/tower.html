@@ -1,0 +1,14 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Torre de control · Supply Chain Arena</title><link rel="stylesheet" href="css/app.css"></head><body>
+<header class="topbar"><div class="brand"><div class="brand-mark"></div><div><div class="brand-title">Torre de Control</div><div class="brand-sub">Planeación y decisiones del equipo</div></div></div><div class="row"><span id="net" class="status">conectando…</span><a class="btn light small" href="index.html">Inicio</a></div></header>
+<main class="shell main">
+  <div class="page-head"><div><h1>Decide cómo cumplir cada pedido</h1><p>Selecciona tu equipo, observa el historial de intercepciones y define la ruta y el tamaño de lote antes de mandar el pedido a producción.</p></div><div style="min-width:240px"><label>Equipo</label><select id="team"></select></div></div>
+  <section class="grid">
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Bandeja</div><h2>Pedidos del docente</h2></div></div><div id="towerOrders" class="stack"></div></div>
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Decisión</div><h2>Planeación del pedido</h2></div></div><div id="noSelection" class="empty">Selecciona un pedido para planearlo.</div><div id="planner" class="hidden stack"><div class="mission-summary"><strong id="planOrderTitle"></strong><div id="planOrderMeta" class="muted small"></div></div><div class="route-builder"><div><label>Punto intermedio 1</label><select id="via1"></select></div><div><label>Punto intermedio 2</label><select id="via2"></select></div><div><label>Punto intermedio 3</label><select id="via3"></select></div></div><div><label>Tamaño de lote por viaje</label><input id="lotSize" type="number" min="1" value="2"></div><div class="route-preview" id="routePreview"></div><button class="btn yellow big" id="sendProduction">MANDAR A PRODUCCIÓN</button></div></div>
+  </section>
+  <section class="card"><div class="card-title"><div><div class="eyebrow">Kanban</div><h2>Estado visual de pedidos del equipo</h2></div></div><div id="towerKanban" class="kanban"></div></section>
+  <section class="grid">
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Inteligencia operativa</div><h2>Mapa de calor de la red</h2></div></div><div class="network-wrap"><svg id="heatMap" viewBox="0 0 900 420"></svg></div></div>
+    <div class="stack"><div class="card"><div class="card-title"><div><div class="eyebrow">Estadísticas</div><h2>Desempeño del equipo</h2></div></div><div id="stats" class="kpis"></div></div><div class="card"><div class="card-title"><div><div class="eyebrow">Riesgo</div><h2>Tramos con intercepciones</h2></div></div><div id="interceptHeat" class="route-heat"></div></div></div>
+  </section>
+</main><div id="toast" class="toast"></div><script src="js/common.js"></script><script src="js/tower.js"></script></body></html>
