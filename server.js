@@ -12,29 +12,41 @@ function event(type,data={}){const e={id:data.eventId||`${Date.now()}-${Math.ran
 function due(order){return new Date(order.createdAt).getTime()+(+order.deadlineMin||0)*60000}
 function findOrder(cfg,id){const o=(cfg.orders||[]).find(x=>x.id===id);if(!o)throw new Error('Pedido no encontrado');return o}
 function availableQty(o){const transit=(o.shipments||[]).filter(s=>s.status==='EN_TRANSITO').reduce((a,s)=>a+s.qty,0);return Math.max(0,(+o.producedQty||0)-(+o.lostQty||0)-(+o.deliveredQty||0)-transit)}
-function applyAction(cfg,a){cfg.orders=cfg.orders||[];cfg.teams=cfg.teams||[];
+function assertOrderOpen(o){if(o.status==='CANCELADO')throw new Error('El pedido fue cancelado');if(['ENTREGADO','ENTREGADO_TARDE'].includes(o.status))throw new Error('El pedido ya está cerrado')}
+function applyAction(cfg,a){cfg.orders=cfg.orders||[];cfg.teams=cfg.teams||[];cfg.productDesigns=cfg.productDesigns||{};
+  if(a.type==='cancel_order'){
+    const o=findOrder(cfg,a.orderId);if(['ENTREGADO','ENTREGADO_TARDE','CANCELADO'].includes(o.status))throw new Error('El pedido ya está cerrado');
+    const active=(o.shipments||[]).filter(s=>s.status==='EN_TRANSITO');for(const s of active){s.status='CANCELADO';s.endedAt=new Date().toISOString()}
+    o.status='CANCELADO';o.cancelledAt=new Date().toISOString();o.cancelReason=a.reason||'Cancelado por el docente';
+    event('order_cancelled',{teamId:o.teamId,orderId:o.id,label:o.label,reason:o.cancelReason});return;
+  }
+  if(a.type==='save_product_design'){
+    if(!a.teamId)throw new Error('Equipo no válido');
+    cfg.productDesigns[a.teamId]={name:a.name||'Producto del equipo',pieces:Array.isArray(a.pieces)?a.pieces.slice(0,300):[],updatedAt:new Date().toISOString()};
+    event('product_design_saved',{teamId:a.teamId,pieces:cfg.productDesigns[a.teamId].pieces.length,name:cfg.productDesigns[a.teamId].name});return;
+  }
   if(a.type==='add_order'){
     const targets=a.teamId&&a.teamId!=='ALL'?[cfg.teams.find(t=>t.id===a.teamId)].filter(Boolean):cfg.teams;
     if(!targets.length)throw new Error('No hay equipos configurados');const seq=(cfg.orderSeq||0)+1;cfg.orderSeq=seq;const label=`PED-${String(seq).padStart(2,'0')}`,requestId=`REQ-${Date.now().toString(36)}`,createdAt=new Date().toISOString();
     for(const t of targets){cfg.orders.push({id:`${requestId}-${t.id}`,requestId,label,teamId:t.id,destination:a.destination,quantity:+a.quantity||1,deadlineMin:+a.deadlineMin||8,priority:a.priority||'normal',createdAt,status:'NUEVO',routeNodes:[],lotSize:1,producedQty:0,deliveredQty:0,lostQty:0,shipments:[]});event('order_created',{teamId:t.id,orderId:`${requestId}-${t.id}`,label,destination:a.destination,quantity:+a.quantity||1})}return;
   }
   if(a.type==='plan_order'){
-    const o=findOrder(cfg,a.orderId);if(['ENTREGADO','ENTREGADO_TARDE'].includes(o.status))throw new Error('El pedido ya está cerrado');o.routeNodes=(a.routeNodes||[]).filter(Boolean);o.lotSize=Math.max(1,+a.lotSize||1);o.plannedAt=new Date().toISOString();o.planRevision=(o.planRevision||0)+1;if(o.status==='NUEVO')o.status='EN_PRODUCCION';event('order_planned',{teamId:o.teamId,orderId:o.id,label:o.label,routeNodes:o.routeNodes,lotSize:o.lotSize});return;
+    const o=findOrder(cfg,a.orderId);assertOrderOpen(o);o.routeNodes=(a.routeNodes||[]).filter(Boolean);o.lotSize=Math.max(1,+a.lotSize||1);o.plannedAt=new Date().toISOString();o.planRevision=(o.planRevision||0)+1;if(o.status==='NUEVO')o.status='EN_PRODUCCION';event('order_planned',{teamId:o.teamId,orderId:o.id,label:o.label,routeNodes:o.routeNodes,lotSize:o.lotSize});return;
   }
   if(a.type==='produce'){
-    const o=findOrder(cfg,a.orderId);const qty=Math.max(1,+a.qty||1);o.producedQty=(+o.producedQty||0)+qty;if(o.status==='NUEVO')o.status='EN_PRODUCCION';event('produced',{teamId:o.teamId,orderId:o.id,label:o.label,units:qty,producedQty:o.producedQty});return;
+    const o=findOrder(cfg,a.orderId);assertOrderOpen(o);const qty=Math.max(1,+a.qty||1);o.producedQty=(+o.producedQty||0)+qty;if(o.status==='NUEVO')o.status='EN_PRODUCCION';event('produced',{teamId:o.teamId,orderId:o.id,label:o.label,units:qty,producedQty:o.producedQty});return;
   }
   if(a.type==='release'){
-    const o=findOrder(cfg,a.orderId);const target=(+o.quantity||0)+(+o.lostQty||0);if((+o.producedQty||0)<target)throw new Error(`Faltan ${target-(+o.producedQty||0)} unidades por producir`);o.releasedAt=new Date().toISOString();if(!['ENTREGADO','ENTREGADO_TARDE'].includes(o.status))o.status='LISTO';event('released',{teamId:o.teamId,orderId:o.id,label:o.label,units:availableQty(o)});return;
+    const o=findOrder(cfg,a.orderId);assertOrderOpen(o);const target=(+o.quantity||0)+(+o.lostQty||0);if((+o.producedQty||0)<target)throw new Error(`Faltan ${target-(+o.producedQty||0)} unidades por producir`);o.releasedAt=new Date().toISOString();if(!['ENTREGADO','ENTREGADO_TARDE'].includes(o.status))o.status='LISTO';event('released',{teamId:o.teamId,orderId:o.id,label:o.label,units:availableQty(o)});return;
   }
   if(a.type==='transport_start'){
-    const o=findOrder(cfg,a.orderId);if(!o.routeNodes?.length)throw new Error('La torre aún no define ruta');const qty=Math.min(Math.max(1,+a.qty||o.lotSize||1),availableQty(o),Math.max(0,(+o.quantity||0)-(+o.deliveredQty||0)));if(qty<=0)throw new Error('No hay producto disponible para recoger');const s={id:a.shipmentId||`S-${Date.now().toString(36)}-${Math.random().toString(16).slice(2,6)}`,member:a.member||'Transportista',qty,startedAt:new Date().toISOString(),status:'EN_TRANSITO',routeNodes:[...o.routeNodes]};o.shipments=o.shipments||[];o.shipments.push(s);o.status='EN_DISTRIBUCION';event('transport_start',{teamId:o.teamId,orderId:o.id,label:o.label,shipmentId:s.id,member:s.member,units:qty,routeNodes:s.routeNodes});return s;
+    const o=findOrder(cfg,a.orderId);assertOrderOpen(o);if(!o.routeNodes?.length)throw new Error('La torre aún no define ruta');const qty=Math.min(Math.max(1,+a.qty||o.lotSize||1),availableQty(o),Math.max(0,(+o.quantity||0)-(+o.deliveredQty||0)));if(qty<=0)throw new Error('No hay producto disponible para recoger');const s={id:a.shipmentId||`S-${Date.now().toString(36)}-${Math.random().toString(16).slice(2,6)}`,member:a.member||'Transportista',qty,startedAt:new Date().toISOString(),status:'EN_TRANSITO',routeNodes:[...o.routeNodes]};o.shipments=o.shipments||[];o.shipments.push(s);o.status='EN_DISTRIBUCION';event('transport_start',{teamId:o.teamId,orderId:o.id,label:o.label,shipmentId:s.id,member:s.member,units:qty,routeNodes:s.routeNodes});return s;
   }
   if(a.type==='intercepted'){
-    const o=findOrder(cfg,a.orderId),s=(o.shipments||[]).find(x=>x.id===a.shipmentId);if(!s||s.status!=='EN_TRANSITO')throw new Error('Envío no válido');s.status='INTERCEPTADO';s.endedAt=new Date().toISOString();s.segment=a.segment||'';o.lostQty=(+o.lostQty||0)+s.qty;o.status='EN_DISTRIBUCION';event('intercepted',{teamId:o.teamId,orderId:o.id,label:o.label,shipmentId:s.id,member:s.member,units:s.qty,segment:s.segment,routeNodes:s.routeNodes});return;
+    const o=findOrder(cfg,a.orderId);assertOrderOpen(o);const s=(o.shipments||[]).find(x=>x.id===a.shipmentId);if(!s||s.status!=='EN_TRANSITO')throw new Error('Envío no válido');s.status='INTERCEPTADO';s.endedAt=new Date().toISOString();s.segment=a.segment||'';o.lostQty=(+o.lostQty||0)+s.qty;o.status='EN_DISTRIBUCION';event('intercepted',{teamId:o.teamId,orderId:o.id,label:o.label,shipmentId:s.id,member:s.member,units:s.qty,segment:s.segment,routeNodes:s.routeNodes});return;
   }
   if(a.type==='delivered'){
-    const o=findOrder(cfg,a.orderId),s=(o.shipments||[]).find(x=>x.id===a.shipmentId);if(!s||s.status!=='EN_TRANSITO')throw new Error('Envío no válido');s.status='ENTREGADO';s.endedAt=new Date().toISOString();o.deliveredQty=(+o.deliveredQty||0)+s.qty;const complete=o.deliveredQty>=o.quantity;if(complete){o.completedAt=new Date().toISOString();o.status=Date.now()<=due(o)?'ENTREGADO':'ENTREGADO_TARDE'}else{o.status='EN_DISTRIBUCION'}event('delivered',{teamId:o.teamId,orderId:o.id,label:o.label,shipmentId:s.id,member:s.member,units:s.qty,routeNodes:s.routeNodes,complete,status:o.status});return;
+    const o=findOrder(cfg,a.orderId);assertOrderOpen(o);const s=(o.shipments||[]).find(x=>x.id===a.shipmentId);if(!s||s.status!=='EN_TRANSITO')throw new Error('Envío no válido');s.status='ENTREGADO';s.endedAt=new Date().toISOString();o.deliveredQty=(+o.deliveredQty||0)+s.qty;const complete=o.deliveredQty>=o.quantity;if(complete){o.completedAt=new Date().toISOString();o.status=Date.now()<=due(o)?'ENTREGADO':'ENTREGADO_TARDE'}else{o.status='EN_DISTRIBUCION'}event('delivered',{teamId:o.teamId,orderId:o.id,label:o.label,shipmentId:s.id,member:s.member,units:s.qty,routeNodes:s.routeNodes,complete,status:o.status});return;
   }
   throw new Error('Acción no reconocida');
 }
