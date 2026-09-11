@@ -1,0 +1,8 @@
+{
+  "name": "supply-chain-arena-fi",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Laboratorio híbrido de logística: docente, torre de control, producción y transporte.",
+  "main": "server.js",
+  "scripts": {"start": "node server.js"}
+}
