@@ -1,14 +1,14 @@
 const http=require('http'),fs=require('fs'),path=require('path'),os=require('os');
 const {URL}=require('url');
 const PORT=Number(process.env.PORT||3000),ROOT=__dirname,PUBLIC=path.join(ROOT,'public'),DATA=path.join(ROOT,'data'),CONFIG=path.join(DATA,'config.json'),EVENTS=path.join(DATA,'events.ndjson');
-const clients=new Set();let selfTestMode=false;fs.mkdirSync(DATA,{recursive:true});if(!fs.existsSync(EVENTS))fs.writeFileSync(EVENTS,'');
+const clients=new Set();fs.mkdirSync(DATA,{recursive:true});if(!fs.existsSync(EVENTS))fs.writeFileSync(EVENTS,'');
 const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json; charset=utf-8','.png':'image/png','.svg':'image/svg+xml'};
 const json=(res,code,obj)=>{res.writeHead(code,{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store'});res.end(JSON.stringify(obj))};
 const readConfig=()=>JSON.parse(fs.readFileSync(CONFIG,'utf8'));const writeConfig=c=>fs.writeFileSync(CONFIG,JSON.stringify(c,null,2));
 const readEvents=()=>{const t=fs.readFileSync(EVENTS,'utf8').trim();return t?t.split('\n').map(x=>JSON.parse(x)):[]};const appendEvent=e=>fs.appendFileSync(EVENTS,JSON.stringify(e)+'\n');
 const body=req=>new Promise((resolve,reject)=>{let b='';req.on('data',c=>{b+=c;if(b.length>2_000_000){reject(new Error('too large'));req.destroy()}});req.on('end',()=>{try{resolve(b?JSON.parse(b):{})}catch(e){reject(e)}});req.on('error',reject)});
 function emit(type,data){const msg=`event: ${type}\ndata: ${JSON.stringify(data)}\n\n`;for(const r of clients){try{r.write(msg)}catch{clients.delete(r)}}}
-function event(type,data={}){const e={id:data.eventId||`${Date.now()}-${Math.random().toString(16).slice(2)}`,ts:new Date().toISOString(),type,...data};delete e.eventId;if(!selfTestMode){appendEvent(e);emit('event',e)}return e}
+function event(type,data={}){const e={id:data.eventId||`${Date.now()}-${Math.random().toString(16).slice(2)}`,ts:new Date().toISOString(),type,...data};delete e.eventId;appendEvent(e);emit('event',e);return e}
 function chat(teamId,text,kind='system',meta={}){if(!teamId||!text)return;return event('chat_message',{teamId,text:String(text).slice(0,180),kind,...meta})}
 function due(order){return new Date(order.createdAt).getTime()+(+order.deadlineMin||0)*60000}
 function findOrder(cfg,id){const o=(cfg.orders||[]).find(x=>x.id===id);if(!o)throw new Error('Pedido no encontrado');return o}
@@ -99,23 +99,8 @@ function applyAction(cfg,a){ensureCfg(cfg);
   }
   throw new Error('Acción no reconocida');
 }
-function runSelfTest(){selfTestMode=true;try{
-  const cfg=ensureCfg({orderSeq:0,teams:[{id:'A',name:'Equipo A',plant:'Planta A',members:['Transportista A1','Transportista A2']},{id:'B',name:'Equipo B',plant:'Planta B',members:['Transportista B1','Transportista B2']}],orders:[],captures:[],inventory:{A:{productName:'Producto A',materials:[{id:'M1',name:'Roja',initialQty:100,stockQty:100,perProduct:2,consumedQty:0,recoveredQty:0},{id:'M2',name:'Azul',initialQty:100,stockQty:100,perProduct:1,consumedQty:0,recoveredQty:0}]},B:{productName:'Producto B',materials:[{id:'BM1',name:'Roja',initialQty:10,stockQty:10,perProduct:1,consumedQty:0,recoveredQty:0}]}}});
-  const ok=(x,msg)=>{if(!x)throw new Error(msg)};
-  applyAction(cfg,{type:'add_order',destination:'Cliente X',quantity:2,deadlineMin:10,priority:'normal',teamId:'A'});let o=cfg.orders[0];
-  applyAction(cfg,{type:'plan_order',orderId:o.id,routeNodes:['Planta A','Nodo 1','Cliente X'],lotSize:1});applyAction(cfg,{type:'produce',orderId:o.id,qty:2});applyAction(cfg,{type:'release',orderId:o.id});
-  applyAction(cfg,{type:'transport_start',orderId:o.id,shipmentId:'S-1',qty:1,member:'Transportista A1'});applyAction(cfg,{type:'intercepted',orderId:o.id,shipmentId:'S-1',segment:'Planta A → Nodo 1',interceptorTeamId:'B',interceptorMember:'Transportista B1'});
-  let cap=cfg.captures[0];ok(cap&&cap.status==='EN_RETORNO'&&cap.interceptorMember==='Transportista B1','captura no asignada');
-  applyAction(cfg,{type:'capture_return_arrived',captureId:cap.id,teamId:'B',member:'Transportista B1'});ok(cap.status==='PENDIENTE_FABRICA','retorno no espera fábrica');
-  const stockBefore=cfg.inventory.B.materials.find(m=>m.name==='Roja').stockQty;applyAction(cfg,{type:'receive_capture',captureId:cap.id,teamId:'B',receivedBy:'Producción B'});ok(cap.status==='RECIBIDO','fábrica no validó retorno');ok(cfg.inventory.B.materials.find(m=>m.name==='Roja').stockQty>stockBefore,'inventario no recibió captura');
-  applyAction(cfg,{type:'transport_start',orderId:o.id,shipmentId:'S-2',qty:1,member:'Transportista A1'});applyAction(cfg,{type:'transport_report_delivery',orderId:o.id,shipmentId:'S-2',member:'Transportista A1'});let s=o.shipments.find(x=>x.id==='S-2');ok(s.status==='PENDIENTE_CLIENTE'&&o.deliveredQty===0,'entrega se contabilizó antes del cliente');
-  applyAction(cfg,{type:'client_validate_delivery',orderId:o.id,shipmentId:'S-2',accept:true});ok(s.status==='ENTREGADO'&&o.deliveredQty===1,'validación cliente no contabilizó entrega');
-  applyAction(cfg,{type:'produce',orderId:o.id,qty:1});applyAction(cfg,{type:'transport_start',orderId:o.id,shipmentId:'S-3',qty:1,member:'Transportista A2'});applyAction(cfg,{type:'transport_report_delivery',orderId:o.id,shipmentId:'S-3',member:'Transportista A2'});applyAction(cfg,{type:'client_validate_delivery',orderId:o.id,shipmentId:'S-3',accept:true});ok(['ENTREGADO','ENTREGADO_TARDE'].includes(o.status)&&o.deliveredQty===2,'pedido no cerró con doble validación');
-  return {ok:true,checks:['interceptor identificado','retorno asignado','doble validación retorno','inventario recuperado','entrega pendiente de cliente','doble validación entrega','pedido cerrado'],captureStatus:cap.status,orderStatus:o.status,deliveredQty:o.deliveredQty};
-}finally{selfTestMode=false}}
 function serveStatic(urlPath,res){let p=urlPath==='/'?'/index.html':decodeURIComponent(urlPath.split('?')[0]);const file=path.normalize(path.join(PUBLIC,p));if(!file.startsWith(PUBLIC)){res.writeHead(403);return res.end('Forbidden')}fs.stat(file,(err,st)=>{if(err||!st.isFile()){res.writeHead(404);return res.end('Not found')}res.writeHead(200,{'Content-Type':mime[path.extname(file).toLowerCase()]||'application/octet-stream','Cache-Control':'no-cache'});fs.createReadStream(file).pipe(res)})}
 const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host||'localhost'}`);try{
-  if(req.method==='GET'&&u.pathname==='/api/selftest')return json(res,200,runSelfTest());
   if(req.method==='GET'&&u.pathname==='/api/config')return json(res,200,readConfig());
   if(req.method==='POST'&&u.pathname==='/api/config'){const c=ensureCfg(await body(req));writeConfig(c);emit('config',c);return json(res,200,{ok:true})}
   if(req.method==='POST'&&u.pathname==='/api/action'){const a=await body(req),c=ensureCfg(readConfig());const result=applyAction(c,a);writeConfig(c);emit('config',c);return json(res,200,{ok:true,result,config:c})}
@@ -125,5 +110,4 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
   if(req.method==='GET'&&u.pathname==='/api/stream'){res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive','Access-Control-Allow-Origin':'*'});res.write('retry: 2500\n\n');clients.add(res);req.on('close',()=>clients.delete(res));return}
   serveStatic(u.pathname,res)
 }catch(e){json(res,400,{ok:false,error:e.message})}});
-console.log('SELFTEST_RESULT',JSON.stringify(runSelfTest()));
 server.listen(PORT,'0.0.0.0',()=>{console.log(`\nSupply Chain Arena activa en puerto ${PORT}`);console.log(`Docente: http://localhost:${PORT}/teacher.html`);for(const [name,list] of Object.entries(os.networkInterfaces()))for(const n of list||[])if(n.family==='IPv4'&&!n.internal){console.log(`Torre (${name}): http://${n.address}:${PORT}/tower.html`);console.log(`Producción (${name}): http://${n.address}:${PORT}/production.html`);console.log(`Transportista (${name}): http://${n.address}:${PORT}/transport.html`)}console.log('No requiere Internet ni paquetes npm externos.\n')});
