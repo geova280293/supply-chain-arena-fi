@@ -2,7 +2,7 @@
 let chatCfg={teams:[]},messages=[],open=false,unread=0;
 const role=location.pathname.includes('tower')?'Torre de Control':location.pathname.includes('production')?'Producción':'Transporte';
 function teamId(){return document.getElementById('team')?.value||''}
-function sender(){if(role==='Transporte'){const t=chatCfg.teams.find(x=>x.id===teamId()),i=+(document.getElementById('member')?.value||0);return t?.members?.[i]||'Transportista'}return role}
+function sender(){if(role==='Transporte'){const el=document.getElementById('member');return el?.value||el?.selectedOptions?.[0]?.textContent||'Transportista'}return role}
 function mount(){
  if(document.getElementById('teamChat'))return;
  document.body.insertAdjacentHTML('beforeend','<button id="chatFab" class="chat-fab" aria-label="Chat de equipo">💬<span id="chatUnread" class="chat-unread hidden">0</span></button><section id="teamChat" class="team-chat hidden"><div class="chat-head"><div><strong>Chat del equipo</strong><span id="chatTeamName">Comunicación operativa</span></div><button class="chat-close" id="chatClose">×</button></div><div id="chatMessages" class="chat-messages"></div><div class="chat-quick" id="chatQuick"></div><div class="chat-compose"><input id="chatInput" maxlength="100" placeholder="Mensaje corto…"><button id="chatSend">Enviar</button></div></section>');
