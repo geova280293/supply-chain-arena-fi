@@ -125,4 +125,5 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
   if(req.method==='GET'&&u.pathname==='/api/stream'){res.writeHead(200,{'Content-Type':'text/event-stream','Cache-Control':'no-cache','Connection':'keep-alive','Access-Control-Allow-Origin':'*'});res.write('retry: 2500\n\n');clients.add(res);req.on('close',()=>clients.delete(res));return}
   serveStatic(u.pathname,res)
 }catch(e){json(res,400,{ok:false,error:e.message})}});
+console.log('SELFTEST_RESULT',JSON.stringify(runSelfTest()));
 server.listen(PORT,'0.0.0.0',()=>{console.log(`\nSupply Chain Arena activa en puerto ${PORT}`);console.log(`Docente: http://localhost:${PORT}/teacher.html`);for(const [name,list] of Object.entries(os.networkInterfaces()))for(const n of list||[])if(n.family==='IPv4'&&!n.internal){console.log(`Torre (${name}): http://${n.address}:${PORT}/tower.html`);console.log(`Producción (${name}): http://${n.address}:${PORT}/production.html`);console.log(`Transportista (${name}): http://${n.address}:${PORT}/transport.html`)}console.log('No requiere Internet ni paquetes npm externos.\n')});
