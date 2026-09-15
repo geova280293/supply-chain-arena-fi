@@ -97,3 +97,7 @@ label{display:block;margin-bottom:7px;font-size:11px;font-weight:950;letter-spac
 button:disabled{opacity:.45;cursor:not-allowed;filter:none!important}
 @media(max-width:720px){.chat-fab{right:14px;bottom:14px}.team-chat{right:14px;bottom:82px;height:min(540px,calc(100vh - 105px))}}
 @media print{.chat-fab,.team-chat{display:none!important}}
+
+.validation-card{border:1px solid var(--line);border-radius:16px;background:#fff;padding:14px}
+.validation-card .top{display:flex;justify-content:space-between;gap:12px;align-items:center}
+.transport-card .pill,.capture-card .pill,.validation-card .pill{margin-right:4px}
