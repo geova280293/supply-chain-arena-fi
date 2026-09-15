@@ -1,9 +1,27 @@
 <!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Transportista · Supply Chain Arena</title><link rel="stylesheet" href="css/app.css"></head><body>
-<header class="topbar"><div class="brand"><div class="brand-mark"></div><div><div class="brand-title">Transportista</div><div class="brand-sub">Recoge, corre y entrega</div></div></div><div class="row"><span id="net" class="status">conectando…</span><span id="pendingCount" class="status">0 pendientes</span><a class="btn light small" href="index.html">Inicio</a></div></header>
+<header class="topbar"><div class="brand"><div class="brand-mark"></div><div><div class="brand-title">Transportista</div><div class="brand-sub">Entregas, intercepciones y retornos</div></div></div><div class="row"><span id="net" class="status">conectando…</span><span id="pendingCount" class="status">0 pendientes</span><a class="btn light small" href="index.html">Inicio</a></div></header>
 <main class="student-wrap main">
-  <div class="page-head"><div><h1>Tu misión es simple</h1><p>Cuando Producción libere un pedido, recógelo en planta. Inicia el viaje y registra solo el resultado: entrega o intercepción.</p></div></div>
-  <section class="grid"><div class="card"><div class="card-title"><div><div class="eyebrow">Identificación</div><h2>Quién transporta</h2></div></div><div class="stack"><div><label>Equipo</label><select id="team"></select></div><div><label>Integrante</label><select id="member"></select></div><button class="btn light" id="syncBtn">Sincronizar pendientes</button></div></div><div class="card"><div class="card-title"><div><div class="eyebrow">Pedidos listos</div><h2>Recoger en planta</h2></div></div><div id="readyOrders" class="stack"></div></div></section>
-  <section class="card hidden" id="activeCard"><div class="card-title"><div><div class="eyebrow">En tránsito</div><h2 id="activeTitle">Misión activa</h2></div><div class="truck" style="position:relative;right:auto;bottom:auto;transform:scale(.32);transform-origin:right center;width:132px;margin-right:-55px"></div></div><div id="activeSummary" class="mission-summary"></div><div class="action-grid" style="margin-top:14px"><button class="btn red big" id="interceptBtn">INTERCEPTADO</button><button class="btn green big" id="deliverBtn">ENTREGADO</button></div></section>
+  <div class="page-head"><div><h1>Ejecuta tu envío y gestiona capturas</h1><p>Puedes llevar un envío propio y, si interceptaste a un rival, también tendrás una misión de retorno hacia tu fábrica. Las entregas requieren validación del cliente/docente y los retornos requieren validación de Fabricación.</p></div></div>
+  <section class="grid">
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Identificación</div><h2>Quién transporta</h2></div></div><div class="stack"><div><label>Equipo</label><select id="team"></select></div><div><label>Transportista</label><select id="member"></select></div><button class="btn light" id="syncBtn">Sincronizar pendientes</button></div></div>
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Pedidos listos</div><h2>Recoger en planta</h2></div></div><div id="readyOrders" class="stack"></div></div>
+  </section>
+
+  <section class="grid">
+    <div class="card" id="ownMissionCard"><div class="card-title"><div><div class="eyebrow">Mi envío</div><h2>Transporte propio</h2></div></div><div id="ownMission"></div></div>
+    <div class="card"><div class="card-title"><div><div class="eyebrow">Capturas</div><h2>Retornos a mi fábrica</h2></div></div><div id="returnMissions" class="stack"></div></div>
+  </section>
 </main>
-<div id="interceptModal" class="modal hidden"><div class="modal-card"><div class="card-title"><div><div class="eyebrow">Intercepción</div><h2>Registrar pérdida y capturador</h2></div></div><div><label>Equipo que realizó la intercepción</label><select id="interceptorTeam"></select></div><div class="small muted" style="margin:8px 0 12px">El equipo capturador deberá llevar físicamente el material a su fábrica antes de sumarlo a su inventario.</div><div id="segmentButtons" class="stack"></div><button class="btn light big" id="cancelIntercept" style="margin-top:12px">Cancelar</button></div></div>
+
+<div id="interceptModal" class="modal hidden"><div class="modal-card">
+  <div class="card-title"><div><div class="eyebrow">Intercepción</div><h2>¿Quién realizó la captura?</h2></div></div>
+  <div class="stack">
+    <div><label>Equipo capturador</label><select id="interceptorTeam"></select></div>
+    <div><label>Transportista capturador</label><select id="interceptorMember"></select></div>
+    <div class="small muted">Al confirmar, el material aparecerá inmediatamente como misión de retorno en la pantalla de ese transportista.</div>
+    <div><label>Tramo de la intercepción</label><div id="segmentButtons" class="stack"></div></div>
+  </div>
+  <button class="btn light big" id="cancelIntercept" style="margin-top:12px">Cancelar</button>
+</div></div>
+
 <div id="toast" class="toast"></div><script src="js/common.js"></script><script src="js/db.js"></script><script src="js/transport.js"></script><script src="js/chat.js"></script></body></html>
